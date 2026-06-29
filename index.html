@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>This week</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F5F1;
+    --surface:#FFFFFF;
+    --ink:#19211F;
+    --muted:#6E7672;
+    --faint:#9AA09C;
+    --line:#E7E4DD;
+    --accent:#2F6F62;
+    --accent-soft:#E4EFEB;
+    --urgent:#B5742A;
+    --urgent-soft:#F6ECDD;
+    --display:"Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --body:"Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--body);
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding:0 18px 80px;
+  }
+  .wrap{max-width:1080px;margin:0 auto;}
+
+  /* Header */
+  header{
+    position:sticky;top:0;z-index:20;
+    background:var(--paper);
+    padding:26px 0 16px;
+    margin-bottom:6px;
+  }
+  .eyebrow{
+    font-family:var(--display);
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 6px;
+  }
+  .head-row{
+    display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 18px;
+  }
+  h1{
+    font-family:var(--display);
+    font-weight:600;font-size:30px;line-height:1.05;margin:0;letter-spacing:-.01em;
+  }
+  .range{color:var(--muted);font-size:15px;}
+  .meter{
+    margin-top:16px;display:flex;align-items:center;gap:14px;
+  }
+  .bar{
+    position:relative;flex:1;height:8px;border-radius:99px;background:var(--line);overflow:hidden;
+  }
+  .bar > span{
+    position:absolute;left:0;top:0;bottom:0;width:0%;
+    background:var(--accent);border-radius:99px;transition:width .45s cubic-bezier(.2,.7,.2,1);
+  }
+  .count{
+    font-family:var(--display);font-variant-numeric:tabular-nums;
+    font-size:14px;color:var(--ink);white-space:nowrap;font-weight:500;
+  }
+  .count b{color:var(--accent);font-weight:600;}
+
+  /* Priorities banner */
+  .priorities{
+    background:var(--urgent-soft);
+    border:1px solid #ECDCC4;
+    border-radius:14px;
+    padding:16px 18px;
+    margin:14px 0 22px;
+  }
+  .priorities .ptitle{
+    font-family:var(--display);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--urgent);margin:0 0 10px;font-weight:600;
+  }
+  .priorities ol{margin:0;padding:0;list-style:none;display:grid;gap:9px;}
+  .priorities li{
+    display:flex;gap:11px;align-items:flex-start;font-size:15px;line-height:1.45;
+  }
+  .priorities .num{
+    font-family:var(--display);font-variant-numeric:tabular-nums;
+    color:var(--urgent);font-weight:600;min-width:16px;
+  }
+
+  /* Day grid */
+  .grid{display:grid;grid-template-columns:1fr;gap:16px;}
+  @media(min-width:720px){.grid{grid-template-columns:1fr 1fr;}}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:18px 18px 8px;
+    display:flex;flex-direction:column;
+  }
+  .card.lock{grid-column:1/-1;}
+  .day-head{
+    display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+    padding-bottom:12px;margin-bottom:6px;border-bottom:1px solid var(--line);
+  }
+  .day-name{font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-.01em;}
+  .day-date{color:var(--faint);font-size:13px;font-family:var(--display);font-variant-numeric:tabular-nums;}
+  .day-prog{
+    font-family:var(--display);font-variant-numeric:tabular-nums;
+    font-size:12.5px;color:var(--muted);font-weight:500;
+  }
+  .day-prog.done{color:var(--accent);}
+
+  .tz{font-size:12px;color:var(--faint);margin:-2px 0 8px;}
+
+  /* Task rows */
+  ul.tasks{list-style:none;margin:0;padding:0;}
+  li.task{padding:2px 0;}
+  label.row{
+    display:flex;gap:12px;align-items:flex-start;
+    padding:9px 6px 9px 4px;border-radius:9px;cursor:pointer;
+    transition:background .15s ease;
+  }
+  label.row:hover{background:#FAFAF8;}
+  input[type=checkbox]{position:absolute;opacity:0;width:0;height:0;}
+  .box{
+    flex:none;width:20px;height:20px;margin-top:1px;border-radius:6px;
+    border:1.6px solid #CFD2CC;background:#fff;
+    display:flex;align-items:center;justify-content:center;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .box svg{width:12px;height:12px;stroke:#fff;stroke-width:3;fill:none;
+    stroke-dasharray:18;stroke-dashoffset:18;transition:stroke-dashoffset .22s ease;}
+  input:focus-visible + .box{outline:2px solid var(--accent);outline-offset:2px;}
+  input:checked + .box{background:var(--accent);border-color:var(--accent);}
+  input:checked + .box svg{stroke-dashoffset:0;}
+
+  .txt{flex:1;min-width:0;}
+  .txt .main{font-size:15px;line-height:1.45;transition:color .2s ease;}
+  .txt .note{display:block;font-size:13px;color:var(--muted);margin-top:2px;line-height:1.4;}
+  input:checked ~ .txt .main{color:var(--faint);text-decoration:line-through;text-decoration-color:#C8CCC7;}
+  input:checked ~ .txt .note{color:var(--faint);}
+
+  .pill{
+    display:inline-block;font-family:var(--display);font-size:10.5px;letter-spacing:.1em;
+    text-transform:uppercase;font-weight:600;color:var(--accent);
+    background:var(--accent-soft);border-radius:6px;padding:2px 7px;margin-right:8px;
+    vertical-align:1px;
+  }
+
+  /* Footer */
+  footer{
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+    margin-top:26px;padding-top:16px;border-top:1px solid var(--line);
+    color:var(--faint);font-size:13px;
+  }
+  .reset{
+    font-family:var(--body);font-size:13px;color:var(--muted);
+    background:none;border:1px solid var(--line);border-radius:8px;
+    padding:7px 13px;cursor:pointer;transition:all .15s ease;
+  }
+  .reset:hover{border-color:#D2CFC7;color:var(--ink);background:#fff;}
+  .saved{font-variant-numeric:tabular-nums;}
+
+  @media(prefers-reduced-motion:reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Operations board</p>
+    <div class="head-row">
+      <h1>This week</h1>
+      <span class="range">Monday 29 June to Saturday 4 July</span>
+    </div>
+    <div class="meter">
+      <div class="bar"><span id="barFill"></span></div>
+      <div class="count"><b id="doneN">0</b> of <span id="totalN">0</span> done</div>
+    </div>
+  </header>
+
+  <div class="priorities">
+    <p class="ptitle">Clear these first</p>
+    <ol>
+      <li><span class="num">1</span><span>Pay KiwiSaver Monday morning, before the 1 July cutoff for the government contribution.</span></li>
+      <li><span class="num">2</span><span>File GST returns for every company except Kotzikas. Overdue since 20 June.</span></li>
+      <li><span class="num">3</span><span>Complete the accounting questionnaire for the tax year ending 31 March 2026. This unlocks the commercial property finance.</span></li>
+    </ol>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    <span class="saved" id="savedNote">Ticks save automatically.</span>
+    <button class="reset" id="resetBtn">Clear all ticks</button>
+  </footer>
+</div>
+
+<script>
+const DATA = [
+  {
+    key:"mon", name:"Monday", date:"29 June",
+    items:[
+      {id:"mon-w", workout:true, main:"Gym with Ruslan at home, 5:30", note:""},
+      {id:"mon-1", main:"Pay KiwiSaver", note:"First action of the day, before the 1 July cutoff"},
+      {id:"mon-2", main:"Start the GST returns, all companies except Kotzikas"},
+      {id:"mon-3", main:"Run the cleaning schedule report in Claude Code and confirm it executes cleanly"},
+      {id:"mon-4", main:"Call Tambran school about schooling options for the kids"},
+      {id:"mon-5", main:"Russian homework with Ruby in Kowa, after school"},
+      {id:"mon-7", main:"Massage", note:"From 3:30 onwards"},
+      {id:"mon-6", main:"Email the monthly order to Bricemite", note:"By Monday night"}
+    ]
+  },
+  {
+    key:"tue", name:"Tuesday", date:"30 June", tz:"This is Wednesday 1 July New Zealand time",
+    items:[
+      {id:"tue-w", workout:true, main:"Swimming and yoga"},
+      {id:"tue-1", main:"Call Steven", note:"Agree a payment plan, and confirm his lawyer has sent the mortgage documents to Lloyd"},
+      {id:"tue-2", main:"Finish the GST returns if anything remains"},
+      {id:"tue-3", main:"Read Andrew's crypto tax email and book a call with him this week"},
+      {id:"tue-4", main:"Begin the accounting questionnaire"}
+    ]
+  },
+  {
+    key:"wed", name:"Wednesday", date:"1 July",
+    items:[
+      {id:"wed-w", workout:true, main:"Run and pilates"},
+      {id:"wed-1", main:"Oralux ads, rebuild", note:"Build the new campaign from Blake's scaling material and turn off the sets you no longer need"},
+      {id:"wed-2", main:"Mouthwash launch, part one", note:"Work through the rest of Blake's videos and start the website"},
+      {id:"wed-3", main:"Contact the pottery people to order the extra pots you are missing"}
+    ]
+  },
+  {
+    key:"thu", name:"Thursday", date:"2 July",
+    items:[
+      {id:"thu-w", workout:true, main:"Bike"},
+      {id:"thu-1", main:"Mouthwash launch, part two", note:"Finish the website and set up the first ads"},
+      {id:"thu-2", main:"Follow up with Cheryl and David on the 42 Marshall Road plans"},
+      {id:"thu-3", main:"Follow up with the 42 Marshall Road garage tenant on rent, one month behind"},
+      {id:"thu-4", main:"Message Chad regarding the US debt notes"}
+    ]
+  },
+  {
+    key:"fri", name:"Friday", date:"3 July",
+    items:[
+      {id:"fri-w", workout:true, main:"Gym"},
+      {id:"fri-7", main:"US trip with Hayden for the residency appointment", note:"About three hours in the morning. Can move to Thursday or Saturday morning if Friday is full"},
+      {id:"fri-1", main:"Prepare Taylor's July social media brief for Oralux"},
+      {id:"fri-2", main:"Surflink admin, Xero and personal finance"},
+      {id:"fri-3", main:"Set up Gmail rules so Surflink mail sorts itself"},
+      {id:"fri-4", main:"Respond to Lindsey regarding Yasmil"},
+      {id:"fri-5", main:"Pay Yessica for the two extra shifts"},
+      {id:"fri-6", main:"Claude Code time to move the needle"}
+    ]
+  },
+  {
+    key:"sat", name:"Saturday", date:"4 July",
+    items:[
+      {id:"sat-w", workout:true, main:"Swimming and run"},
+      {id:"sat-1", main:"Lock the three dates below"},
+      {id:"sat-2", main:"Catch up on anything that slipped"}
+    ]
+  },
+  {
+    key:"dinner", name:"Dinners this week", date:"", lock:true,
+    items:[
+      {id:"dinner-1", main:"Roast whole chicken with potatoes and vegetables", note:"Feeds four"},
+      {id:"dinner-2", main:"Skillet chicken thighs with garlic and lemon, over rice or greens", note:"About two thighs per person"},
+      {id:"dinner-3", main:"Steak with chimichurri, a green salad, and a starch"},
+      {id:"dinner-4", main:"Steak fajitas with peppers and onion"},
+      {id:"dinner-5", main:"Steak with a garlic butter pan sauce and roasted vegetables"}
+    ]
+  },
+  {
+    key:"lock", name:"Dates to lock", date:"", lock:true,
+    items:[
+      {id:"lock-1", main:"Date night, afternoon into dinner at Espejo"},
+      {id:"lock-2", main:"Video organization session with Hayden for the trip footage"},
+      {id:"lock-3", main:"Planning session with Hayden"}
+    ]
+  }
+];
+
+const STORE_KEY = "weekboard:v1";
+let state = {};
+
+function check(){return '<svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"></polyline></svg>';}
+
+function render(){
+  const grid = document.getElementById("grid");
+  grid.innerHTML = DATA.map(sec=>{
+    const total = sec.items.length;
+    const rows = sec.items.map(it=>{
+      const checked = state[it.id] ? "checked" : "";
+      const pill = it.workout ? '<span class="pill">Morning</span>' : "";
+      const note = it.note ? '<span class="note">'+it.note+'</span>' : "";
+      return '<li class="task"><label class="row">'+
+        '<input type="checkbox" data-id="'+it.id+'" '+checked+'>'+
+        '<span class="box">'+check()+'</span>'+
+        '<span class="txt"><span class="main">'+pill+it.main+'</span>'+note+'</span>'+
+        '</label></li>';
+    }).join("");
+    const dateEl = sec.date ? '<span class="day-date">'+sec.date+'</span>' : "";
+    const tz = sec.tz ? '<p class="tz">'+sec.tz+'</p>' : "";
+    const prog = '<span class="day-prog" id="prog-'+sec.key+'">0 / '+total+'</span>';
+    return '<section class="card'+(sec.lock?' lock':'')+'">'+
+      '<div class="day-head"><span class="day-name">'+sec.name+'</span>'+
+      '<span style="display:flex;gap:12px;align-items:baseline;">'+dateEl+prog+'</span></div>'+
+      tz+'<ul class="tasks">'+rows+'</ul></section>';
+  }).join("");
+
+  grid.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener("change", ()=>{
+      state[cb.dataset.id] = cb.checked;
+      if(!cb.checked) delete state[cb.dataset.id];
+      save();
+      updateProgress();
+    });
+  });
+  updateProgress();
+}
+
+function updateProgress(){
+  let total=0, done=0;
+  DATA.forEach(sec=>{
+    let st=0;
+    sec.items.forEach(it=>{ total++; if(state[it.id]){done++; st++;} });
+    const el=document.getElementById("prog-"+sec.key);
+    if(el){
+      el.textContent = st+" / "+sec.items.length;
+      el.classList.toggle("done", st===sec.items.length && sec.items.length>0);
+    }
+  });
+  document.getElementById("doneN").textContent = done;
+  document.getElementById("totalN").textContent = total;
+  const pct = total ? Math.round((done/total)*100) : 0;
+  document.getElementById("barFill").style.width = pct+"%";
+}
+
+async function load(){
+  try{
+    const r = await window.storage.get(STORE_KEY);
+    if(r && r.value) state = JSON.parse(r.value);
+  }catch(e){ state = {}; }
+  render();
+}
+
+let saveTimer=null;
+async function save(){
+  const note=document.getElementById("savedNote");
+  try{
+    await window.storage.set(STORE_KEY, JSON.stringify(state));
+    note.textContent="Saved";
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(()=>{note.textContent="Ticks save automatically.";},1500);
+  }catch(e){
+    note.textContent="Saved for this session only";
+  }
+}
+
+document.getElementById("resetBtn").addEventListener("click", async ()=>{
+  state={};
+  try{ await window.storage.delete(STORE_KEY); }catch(e){}
+  render();
+});
+
+if(window.storage){ load(); } else { render(); }
+</script>
+</body>
+</html>
