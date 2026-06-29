@@ -6,3 +6,8 @@
   from = "/api/save"
   to = "/.netlify/functions/save"
   status = 200
+
+[[headers]]
+  for = "/content.json"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"

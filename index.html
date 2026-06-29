@@ -338,6 +338,7 @@ function render(){
       if(cb.checked) checks[cb.dataset.id]=true; else delete checks[cb.dataset.id];
       cb.closest('li.task').classList.toggle('done-row', cb.checked);
       save(); updateProgress();
+      clearTimeout(pushTimer); pushTimer=setTimeout(pushToGithub, 2000);
     });
   });
 
@@ -410,7 +411,7 @@ function setEdit(on){
 }
 
 function serializeContent(){
-  return SECTIONS.map(s=>{
+  const sections=SECTIONS.map(s=>{
     const ids=(layout[s.key]||[]);
     const items=ids.map(id=>{ const t=itemText(id); const o={id:id, main:t.main}; if(t.note) o.note=t.note; if(t.workout) o.workout=true; return o; });
     const sec={key:s.key, name:s.name};
@@ -420,6 +421,7 @@ function serializeContent(){
     sec.items=items;
     return sec;
   });
+  return {sections, _checks: Object.assign({}, checks)};
 }
 
 function downloadContent(){
@@ -456,21 +458,21 @@ document.getElementById("resetBtn").addEventListener("click", async ()=>{
   render();
 });
 
-async function load(){
+async function load(remoteChecks){
   let saved=null;
   try{ const r=await Store.get(STORE_KEY); if(r&&r.value) saved=JSON.parse(r.value); }catch(e){}
-  if(saved && (saved.checks||saved.layout||saved.text||saved.custom)){
-    checks=saved.checks||{}; textOv=saved.text||{}; custom=saved.custom||{}; deleted=saved.deleted||[];
+  if(saved && (saved.layout||saved.text||saved.custom)){
+    textOv=saved.text||{}; custom=saved.custom||{}; deleted=saved.deleted||[];
     layout=reconcileLayout(saved.layout||cloneDefaultLayout());
-  } else if(saved && typeof saved==='object'){
-    checks=saved; layout=cloneDefaultLayout();
   } else {
-    checks={}; layout=cloneDefaultLayout();
+    layout=cloneDefaultLayout();
   }
+  // remote always wins for checks — this is the synced source of truth
+  checks = remoteChecks || (saved && saved.checks) || {};
   render();
 }
 
-let saveTimer=null;
+let saveTimer=null, pushTimer=null;
 async function save(){
   const note=document.getElementById('savedNote');
   try{
@@ -481,13 +483,17 @@ async function save(){
 }
 
 async function boot(){
-  let data=DATA;
+  let data=DATA, remoteChecks=null;
   try{
     const r=await fetch('./content.json',{cache:'no-store'});
-    if(r.ok){ const j=await r.json(); if(Array.isArray(j) && j.length) data=j; }
+    if(r.ok){
+      const j=await r.json();
+      if(Array.isArray(j) && j.length){ data=j; }
+      else if(j && Array.isArray(j.sections) && j.sections.length){ data=j.sections; remoteChecks=j._checks||null; }
+    }
   }catch(e){}
   buildModel(data);
-  await load();
+  await load(remoteChecks);
 }
 
 const GH_KEY="weekboard:gh";
