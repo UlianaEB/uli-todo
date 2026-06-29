@@ -239,6 +239,7 @@
     }
   ],
   "_checks": {
-    "mon-7": true
+    "mon-w": true,
+    "mon-1": true
   }
 }
