@@ -10,42 +10,32 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js"></script>
 <style>
   :root{
-    --paper:#F6F5F1;
-    --surface:#FFFFFF;
-    --ink:#19211F;
-    --muted:#6E7672;
-    --faint:#9AA09C;
-    --line:#E7E4DD;
-    --accent:#2F6F62;
-    --accent-soft:#E4EFEB;
-    --urgent:#B5742A;
-    --urgent-soft:#F6ECDD;
+    --paper:#F6F5F1; --surface:#FFFFFF; --ink:#19211F; --muted:#6E7672; --faint:#9AA09C;
+    --line:#E7E4DD; --accent:#2F6F62; --accent-soft:#E4EFEB; --urgent:#B5742A; --urgent-soft:#F6ECDD;
     --display:"Space Grotesk", ui-sans-serif, system-ui, sans-serif;
     --body:"Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
-  body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family:var(--body);
-    font-size:16px;line-height:1.5;
-    -webkit-font-smoothing:antialiased;
-    padding:0 18px 80px;
-  }
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;padding:0 18px 80px;}
   .wrap{max-width:1080px;margin:0 auto;}
 
   header{position:sticky;top:0;z-index:20;background:var(--paper);padding:26px 0 14px;margin-bottom:6px;}
   .eyebrow{font-family:var(--display);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;}
-  .head-row{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 18px;}
+  .head-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 18px;}
+  .head-left{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
   h1{font-family:var(--display);font-weight:600;font-size:30px;line-height:1.05;margin:0;letter-spacing:-.01em;}
   .range{color:var(--muted);font-size:15px;}
+  .editbtn{font-family:var(--display);font-size:13px;font-weight:500;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 16px;cursor:pointer;transition:all .15s ease;}
+  .editbtn:hover{border-color:#D2CFC7;}
+  body.editing .editbtn{background:var(--accent);color:#fff;border-color:var(--accent);}
   .meter{margin-top:16px;display:flex;align-items:center;gap:14px;}
   .bar{position:relative;flex:1;height:8px;border-radius:99px;background:var(--line);overflow:hidden;}
   .bar > span{position:absolute;left:0;top:0;bottom:0;width:0%;background:var(--accent);border-radius:99px;transition:width .45s cubic-bezier(.2,.7,.2,1);}
   .count{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:14px;color:var(--ink);white-space:nowrap;font-weight:500;}
   .count b{color:var(--accent);font-weight:600;}
   .hint{margin:12px 0 0;font-size:13px;color:var(--muted);}
+  body.editing .hint::after{content:" Edit mode is on. Rewrite any task, add or delete tasks, then use Download content.json to publish to every device.";color:var(--accent);}
 
   .priorities{background:var(--urgent-soft);border:1px solid #ECDCC4;border-radius:14px;padding:16px 18px;margin:14px 0 22px;}
   .priorities .ptitle{font-family:var(--display);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--urgent);margin:0 0 10px;font-weight:600;}
@@ -55,7 +45,6 @@
 
   .grid{display:grid;grid-template-columns:1fr;gap:16px;}
   @media(min-width:720px){.grid{grid-template-columns:1fr 1fr;}}
-
   .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 18px 12px;display:flex;flex-direction:column;}
   .card.lock{grid-column:1/-1;}
   .day-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:12px;margin-bottom:6px;border-bottom:1px solid var(--line);}
@@ -67,35 +56,72 @@
 
   ul.tasks{list-style:none;margin:0;padding:0;min-height:22px;}
   li.task{display:flex;align-items:stretch;gap:2px;padding:1px 0;}
-  label.row{flex:1;min-width:0;display:flex;gap:12px;align-items:flex-start;padding:9px 4px 9px 4px;border-radius:9px;cursor:pointer;transition:background .15s ease;}
-  label.row:hover{background:#FAFAF8;}
+  label.check{flex:none;display:flex;align-items:flex-start;padding:9px 2px 9px 4px;cursor:pointer;}
   input[type=checkbox]{position:absolute;opacity:0;width:0;height:0;}
   .box{flex:none;width:20px;height:20px;margin-top:1px;border-radius:6px;border:1.6px solid #CFD2CC;background:#fff;display:flex;align-items:center;justify-content:center;transition:border-color .15s ease, background .15s ease;}
   .box svg{width:12px;height:12px;stroke:#fff;stroke-width:3;fill:none;stroke-dasharray:18;stroke-dashoffset:18;transition:stroke-dashoffset .22s ease;}
   input:focus-visible + .box{outline:2px solid var(--accent);outline-offset:2px;}
   input:checked + .box{background:var(--accent);border-color:var(--accent);}
   input:checked + .box svg{stroke-dashoffset:0;}
-  .txt{flex:1;min-width:0;}
-  .txt .main{font-size:15px;line-height:1.45;transition:color .2s ease;}
-  .txt .note{display:block;font-size:13px;color:var(--muted);margin-top:2px;line-height:1.4;}
-  input:checked ~ .txt .main{color:var(--faint);text-decoration:line-through;text-decoration-color:#C8CCC7;}
-  input:checked ~ .txt .note{color:var(--faint);}
+
+  .txt{flex:1;min-width:0;padding:9px 6px;border-radius:9px;cursor:pointer;}
+  body:not(.editing) .txt:hover{background:#FAFAF8;}
+  body.editing .txt{cursor:auto;}
+  .main{font-size:15px;line-height:1.45;}
+  .note{display:block;font-size:13px;color:var(--muted);margin-top:2px;line-height:1.4;}
+  li.task.done-row .maintext{color:var(--faint);text-decoration:line-through;text-decoration-color:#C8CCC7;}
+  li.task.done-row .note{color:var(--faint);}
   .pill{display:inline-block;font-family:var(--display);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:2px 7px;margin-right:8px;vertical-align:1px;}
+
+  .edt{outline:none;}
+  body.editing .maintext.edt, body.editing .note.edt{border-bottom:1px dashed #CBD2CE;padding-bottom:1px;min-width:30px;display:inline-block;}
+  body.editing .edt:focus{border-bottom-color:var(--accent);background:#F8FCFB;}
+  body.editing .note.edt:empty:before{content:"Add a note";color:var(--faint);}
+
+  .del{flex:none;width:0;overflow:hidden;border:none;background:none;color:var(--faint);font-size:19px;line-height:1;cursor:pointer;align-self:center;border-radius:6px;transition:color .15s ease, background .15s ease;padding:0;}
+  body.editing .del{width:28px;height:28px;display:flex;align-items:center;justify-content:center;}
+  .del:hover{color:#B5443A;background:#F6ECEC;}
 
   .grip{flex:none;width:30px;align-self:stretch;display:flex;align-items:center;justify-content:center;color:var(--faint);border-radius:8px;cursor:grab;opacity:.5;touch-action:none;transition:opacity .15s ease, background .15s ease;}
   .grip:hover{opacity:1;background:#F2F1EC;}
   .grip:active{cursor:grabbing;}
   .grip svg{fill:currentColor;pointer-events:none;}
 
+  .addrow{display:none;margin:8px 0 2px;}
+  body.editing .addrow{display:block;}
+  .addbtn{font-family:var(--body);font-size:13px;color:var(--accent);background:none;border:1px dashed #CBD8D3;border-radius:9px;padding:8px 12px;cursor:pointer;width:100%;text-align:left;transition:background .15s ease;}
+  .addbtn:hover{background:var(--accent-soft);}
+
   li.task.ghost{outline:2px dashed var(--accent);outline-offset:-2px;border-radius:10px;}
-  li.task.ghost .row, li.task.ghost .grip{opacity:.3;}
-  li.task.chosen .row{background:#FAFAF8;}
+  li.task.ghost .txt, li.task.ghost .grip, li.task.ghost .check{opacity:.3;}
+  li.task.chosen .txt{background:#FAFAF8;}
 
   footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:26px;padding-top:16px;border-top:1px solid var(--line);color:var(--faint);font-size:13px;}
-  .reset{font-family:var(--body);font-size:13px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:8px;padding:7px 13px;cursor:pointer;transition:all .15s ease;}
-  .reset:hover{border-color:#D2CFC7;color:var(--ink);background:#fff;}
+  .foot-actions{display:flex;gap:10px;flex-wrap:wrap;}
+  .btn{font-family:var(--body);font-size:13px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:8px;padding:7px 13px;cursor:pointer;transition:all .15s ease;}
+  .btn:hover{border-color:#D2CFC7;color:var(--ink);background:#fff;}
+  #exportBtn{display:none;color:var(--accent);border-color:#CBD8D3;}
+  #exportBtn:hover{background:var(--accent-soft);color:var(--accent);}
+  body.editing #exportBtn{display:inline-block;}
   .saved{font-variant-numeric:tabular-nums;}
-
+  .ghpanel{display:none;margin:14px 0 0;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;}
+  .ghpanel.open{display:block;}
+  .ghpanel h2{font-family:var(--display);font-size:14px;margin:0 0 6px;font-weight:600;}
+  .ghpanel label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;}
+  .ghpanel input{width:100%;font-family:var(--body);font-size:14px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);}
+  .ghpanel input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
+  .ghrow{display:flex;gap:10px;flex-wrap:wrap;}
+  .ghrow > div{flex:1;min-width:130px;}
+  .ghnote{font-size:12px;color:var(--muted);margin:12px 0 0;line-height:1.5;}
+  .ghactions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+  .ghsave{font-family:var(--body);font-size:13px;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:9px;padding:9px 16px;cursor:pointer;}
+  .ghsave:hover{filter:brightness(.96);}
+  .ghclose{font-family:var(--body);font-size:13px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:9px;padding:9px 16px;cursor:pointer;}
+  .ghstatus{font-size:13px;margin-top:12px;min-height:18px;line-height:1.45;}
+  .ghstatus.ok{color:var(--accent);} .ghstatus.err{color:#B5443A;}
+  #settingsBtn,#pushBtn{display:none;}
+  #pushBtn{color:var(--accent);border-color:#CBD8D3;}
+  body.editing #settingsBtn, body.editing #pushBtn{display:inline-block;}
   @media(prefers-reduced-motion:reduce){*{transition:none !important;}}
 </style>
 </head>
@@ -104,8 +130,11 @@
   <header>
     <p class="eyebrow">Operations board</p>
     <div class="head-row">
-      <h1>This week</h1>
-      <span class="range">Monday 29 June to Saturday 4 July</span>
+      <div class="head-left">
+        <h1>This week</h1>
+        <span class="range">Monday 29 June to Saturday 4 July</span>
+      </div>
+      <button id="editBtn" class="editbtn">Edit</button>
     </div>
     <div class="meter">
       <div class="bar"><span id="barFill"></span></div>
@@ -123,148 +152,172 @@
     </ol>
   </div>
 
+  <div class="ghpanel" id="ghpanel">
+    <h2>Publish to GitHub</h2>
+    <div class="ghrow">
+      <div><label>Owner</label><input id="ghOwner" placeholder="your GitHub username"></div>
+      <div><label>Repository</label><input id="ghRepo" placeholder="repository name"></div>
+    </div>
+    <div class="ghrow">
+      <div><label>Branch</label><input id="ghBranch" placeholder="main"></div>
+      <div><label>File path</label><input id="ghPath" placeholder="content.json"></div>
+    </div>
+    <label>Access token</label>
+    <input id="ghToken" type="password" placeholder="fine grained token with Contents read and write">
+    <p class="ghnote">The token is saved only in this browser and is never written into the page or the repo. Use a fine grained token limited to this one repository, with Contents set to read and write, and an expiry date. You can revoke it any time in GitHub settings.</p>
+    <div class="ghactions">
+      <button class="ghsave" id="ghSaveBtn">Save settings</button>
+      <button class="ghclose" id="ghCloseBtn">Close</button>
+    </div>
+    <p class="ghstatus" id="ghStatus"></p>
+  </div>
+
   <div class="grid" id="grid"></div>
 
   <footer>
     <span class="saved" id="savedNote">Changes save automatically.</span>
-    <button class="reset" id="resetBtn">Reset to original plan</button>
+    <div class="foot-actions">
+      <button class="btn" id="settingsBtn">GitHub settings</button>
+      <button class="btn" id="pushBtn">Save to GitHub</button>
+      <button class="btn" id="exportBtn">Download content.json</button>
+      <button class="btn" id="resetBtn">Reset to original plan</button>
+    </div>
   </footer>
 </div>
 
 <script>
 const DATA = [
-  {
-    key:"mon", name:"Monday", date:"29 June",
-    items:[
-      {id:"mon-w", workout:true, main:"Gym with Ruslan at home, 5:30", note:""},
-      {id:"mon-1", main:"Pay KiwiSaver", note:"First action of the day, before the 1 July cutoff"},
-      {id:"mon-2", main:"Start the GST returns, all companies except Kotzikas"},
-      {id:"mon-3", main:"Run the cleaning schedule report in Claude Code and confirm it executes cleanly"},
-      {id:"mon-4", main:"Call Tambran school about schooling options for the kids"},
-      {id:"mon-5", main:"Russian homework with Ruby in Kowa, after school"},
-      {id:"mon-7", main:"Massage", note:"From 3:30 onwards"},
-      {id:"mon-6", main:"Email the monthly order to Bricemite", note:"By Monday night"}
-    ]
-  },
-  {
-    key:"tue", name:"Tuesday", date:"30 June", tz:"This is Wednesday 1 July New Zealand time",
-    items:[
-      {id:"tue-w", workout:true, main:"Swimming and yoga"},
-      {id:"tue-1", main:"Call Steven", note:"Agree a payment plan, and confirm his lawyer has sent the mortgage documents to Lloyd"},
-      {id:"tue-2", main:"Finish the GST returns if anything remains"},
-      {id:"tue-3", main:"Read Andrew's crypto tax email and book a call with him this week"},
-      {id:"tue-4", main:"Begin the accounting questionnaire"}
-    ]
-  },
-  {
-    key:"wed", name:"Wednesday", date:"1 July",
-    items:[
-      {id:"wed-w", workout:true, main:"Run and pilates"},
-      {id:"wed-1", main:"Oralux ads, rebuild", note:"Build the new campaign from Blake's scaling material and turn off the sets you no longer need"},
-      {id:"wed-2", main:"Mouthwash launch, part one", note:"Work through the rest of Blake's videos and start the website"},
-      {id:"wed-3", main:"Contact the pottery people to order the extra pots you are missing"}
-    ]
-  },
-  {
-    key:"thu", name:"Thursday", date:"2 July",
-    items:[
-      {id:"thu-w", workout:true, main:"Bike"},
-      {id:"thu-1", main:"Mouthwash launch, part two", note:"Finish the website and set up the first ads"},
-      {id:"thu-2", main:"Follow up with Cheryl and David on the 42 Marshall Road plans"},
-      {id:"thu-3", main:"Follow up with the 42 Marshall Road garage tenant on rent, one month behind"},
-      {id:"thu-4", main:"Message Chad regarding the US debt notes"}
-    ]
-  },
-  {
-    key:"fri", name:"Friday", date:"3 July",
-    items:[
-      {id:"fri-w", workout:true, main:"Gym"},
-      {id:"fri-7", main:"US trip with Hayden for the residency appointment", note:"About three hours in the morning. Can move to Thursday or Saturday morning if Friday is full"},
-      {id:"fri-1", main:"Prepare Taylor's July social media brief for Oralux"},
-      {id:"fri-2", main:"Surflink admin, Xero and personal finance"},
-      {id:"fri-3", main:"Set up Gmail rules so Surflink mail sorts itself"},
-      {id:"fri-4", main:"Respond to Lindsey regarding Yasmil"},
-      {id:"fri-5", main:"Pay Yessica for the two extra shifts"},
-      {id:"fri-6", main:"Claude Code time to move the needle"}
-    ]
-  },
-  {
-    key:"sat", name:"Saturday", date:"4 July",
-    items:[
-      {id:"sat-w", workout:true, main:"Swimming and run"},
-      {id:"sat-1", main:"Lock the three dates below"},
-      {id:"sat-2", main:"Catch up on anything that slipped"}
-    ]
-  },
-  {
-    key:"dinner", name:"Dinners this week", date:"", lock:true,
-    items:[
-      {id:"dinner-1", main:"Roast whole chicken with potatoes and vegetables", note:"Feeds four"},
-      {id:"dinner-2", main:"Skillet chicken thighs with garlic and lemon, over rice or greens", note:"About two thighs per person"},
-      {id:"dinner-3", main:"Steak with chimichurri, a green salad, and a starch"},
-      {id:"dinner-4", main:"Steak fajitas with peppers and onion"},
-      {id:"dinner-5", main:"Steak with a garlic butter pan sauce and roasted vegetables"}
-    ]
-  },
-  {
-    key:"lock", name:"Dates to lock", date:"", lock:true,
-    items:[
-      {id:"lock-1", main:"Date night, afternoon into dinner at Espejo"},
-      {id:"lock-2", main:"Video organization session with Hayden for the trip footage"},
-      {id:"lock-3", main:"Planning session with Hayden"}
-    ]
-  }
+  { key:"mon", name:"Monday", date:"29 June", items:[
+    {id:"mon-w", workout:true, main:"Gym with Ruslan at home, 5:30", note:""},
+    {id:"mon-1", main:"Pay KiwiSaver", note:"First action of the day, before the 1 July cutoff"},
+    {id:"mon-2", main:"Start the GST returns, all companies except Kotzikas"},
+    {id:"mon-3", main:"Run the cleaning schedule report in Claude Code and confirm it executes cleanly"},
+    {id:"mon-4", main:"Call Tambran school about schooling options for the kids"},
+    {id:"mon-5", main:"Russian homework with Ruby in Kowa, after school"},
+    {id:"mon-7", main:"Massage", note:"From 3:30 onwards"},
+    {id:"mon-6", main:"Email the monthly order to Bricemite", note:"By Monday night"}
+  ]},
+  { key:"tue", name:"Tuesday", date:"30 June", tz:"This is Wednesday 1 July New Zealand time", items:[
+    {id:"tue-w", workout:true, main:"Swimming and yoga"},
+    {id:"tue-1", main:"Call Steven", note:"Agree a payment plan, and confirm his lawyer has sent the mortgage documents to Lloyd"},
+    {id:"tue-2", main:"Finish the GST returns if anything remains"},
+    {id:"tue-3", main:"Read Andrew's crypto tax email and book a call with him this week"},
+    {id:"tue-4", main:"Begin the accounting questionnaire"}
+  ]},
+  { key:"wed", name:"Wednesday", date:"1 July", items:[
+    {id:"wed-w", workout:true, main:"Run and pilates"},
+    {id:"wed-1", main:"Oralux ads, rebuild", note:"Build the new campaign from Blake's scaling material and turn off the sets you no longer need"},
+    {id:"wed-2", main:"Mouthwash launch, part one", note:"Work through the rest of Blake's videos and start the website"},
+    {id:"wed-3", main:"Contact the pottery people to order the extra pots you are missing"}
+  ]},
+  { key:"thu", name:"Thursday", date:"2 July", items:[
+    {id:"thu-w", workout:true, main:"Bike"},
+    {id:"thu-1", main:"Mouthwash launch, part two", note:"Finish the website and set up the first ads"},
+    {id:"thu-2", main:"Follow up with Cheryl and David on the 42 Marshall Road plans"},
+    {id:"thu-3", main:"Follow up with the 42 Marshall Road garage tenant on rent, one month behind"},
+    {id:"thu-4", main:"Message Chad regarding the US debt notes"}
+  ]},
+  { key:"fri", name:"Friday", date:"3 July", items:[
+    {id:"fri-w", workout:true, main:"Gym"},
+    {id:"fri-7", main:"US trip with Hayden for the residency appointment", note:"About three hours in the morning. Can move to Thursday or Saturday morning if Friday is full"},
+    {id:"fri-1", main:"Prepare Taylor's July social media brief for Oralux"},
+    {id:"fri-2", main:"Surflink admin, Xero and personal finance"},
+    {id:"fri-3", main:"Set up Gmail rules so Surflink mail sorts itself"},
+    {id:"fri-4", main:"Respond to Lindsey regarding Yasmil"},
+    {id:"fri-5", main:"Pay Yessica for the two extra shifts"},
+    {id:"fri-6", main:"Claude Code time to move the needle"}
+  ]},
+  { key:"sat", name:"Saturday", date:"4 July", items:[
+    {id:"sat-w", workout:true, main:"Swimming and run"},
+    {id:"sat-1", main:"Lock the three dates below"},
+    {id:"sat-2", main:"Catch up on anything that slipped"}
+  ]},
+  { key:"dinner", name:"Dinners this week", date:"", lock:true, items:[
+    {id:"dinner-1", main:"Roast whole chicken with potatoes and vegetables", note:"Feeds four"},
+    {id:"dinner-2", main:"Skillet chicken thighs with garlic and lemon, over rice or greens", note:"About two thighs per person"},
+    {id:"dinner-3", main:"Steak with chimichurri, a green salad, and a starch"},
+    {id:"dinner-4", main:"Steak fajitas with peppers and onion"},
+    {id:"dinner-5", main:"Steak with a garlic butter pan sauce and roasted vegetables"}
+  ]},
+  { key:"lock", name:"Dates to lock", date:"", lock:true, items:[
+    {id:"lock-1", main:"Date night, afternoon into dinner at Espejo"},
+    {id:"lock-2", main:"Video organization session with Hayden for the trip footage"},
+    {id:"lock-3", main:"Planning session with Hayden"}
+  ]}
 ];
 
 const STORE_KEY = "weekboard:v1";
 
-const META = {};
-const DEFAULT_LAYOUT = {};
-const SECTIONS = DATA.map(sec=>{
-  DEFAULT_LAYOUT[sec.key] = sec.items.map(it=>it.id);
-  sec.items.forEach(it=>{ META[it.id]=it; });
-  return {key:sec.key, name:sec.name, date:sec.date, tz:sec.tz, lock:sec.lock};
-});
+let __backend = "memory";
+if (window.storage) { __backend = "cloud"; }
+else { try { localStorage.setItem("__wb_test","1"); localStorage.removeItem("__wb_test"); __backend="local"; } catch(e){ __backend="memory"; } }
+const __mem = {};
+const Store = {
+  async get(k){
+    if(__backend==="cloud"){ try{ return await window.storage.get(k); }catch(e){ return null; } }
+    if(__backend==="local"){ try{ const v=localStorage.getItem(k); return v!=null?{value:v}:null; }catch(e){ return null; } }
+    return __mem[k]!=null?{value:__mem[k]}:null;
+  },
+  async set(k,v){
+    if(__backend==="cloud"){ return await window.storage.set(k,v); }
+    if(__backend==="local"){ localStorage.setItem(k,v); return {value:v}; }
+    __mem[k]=v; return {value:v};
+  },
+  async del(k){
+    if(__backend==="cloud"){ try{ return await window.storage.delete(k); }catch(e){} return; }
+    if(__backend==="local"){ try{ localStorage.removeItem(k); }catch(e){} return; }
+    delete __mem[k];
+  }
+};
 
-let checks = {};
-let layout = {};
-
-function cloneDefaultLayout(){
-  const o={}; for(const k in DEFAULT_LAYOUT) o[k]=DEFAULT_LAYOUT[k].slice(); return o;
+let META={}, DEFAULT_LAYOUT={}, SECTIONS=[];
+function buildModel(data){
+  META={}; DEFAULT_LAYOUT={};
+  SECTIONS = data.map(sec=>{
+    DEFAULT_LAYOUT[sec.key] = (sec.items||[]).map(it=>it.id);
+    (sec.items||[]).forEach(it=>{ META[it.id]=it; });
+    return {key:sec.key, name:sec.name, date:sec.date, tz:sec.tz, lock:sec.lock};
+  });
 }
 
+let checks={}, layout={}, textOv={}, custom={}, deleted=[], editing=false, sortables=[];
+
+function cloneDefaultLayout(){ const o={}; for(const k in DEFAULT_LAYOUT) o[k]=DEFAULT_LAYOUT[k].slice(); return o; }
+
 function reconcileLayout(l){
-  const result={}; const placed=new Set();
+  const result={}, placed=new Set();
   SECTIONS.forEach(s=>result[s.key]=[]);
-  for(const k in l){
-    if(!result[k]) continue;
-    l[k].forEach(id=>{ if(META[id] && !placed.has(id)){ result[k].push(id); placed.add(id); } });
-  }
-  SECTIONS.forEach(s=>{
-    DEFAULT_LAYOUT[s.key].forEach(id=>{ if(!placed.has(id)){ result[s.key].push(id); placed.add(id); } });
-  });
+  const valid=id=> ((META[id] && deleted.indexOf(id)===-1) || custom[id]);
+  for(const k in l){ if(!result[k]) continue; l[k].forEach(id=>{ if(valid(id) && !placed.has(id)){ result[k].push(id); placed.add(id); } }); }
+  SECTIONS.forEach(s=>DEFAULT_LAYOUT[s.key].forEach(id=>{ if(deleted.indexOf(id)===-1 && !placed.has(id)){ result[s.key].push(id); placed.add(id); } }));
+  for(const id in custom){ if(!placed.has(id)){ const k=custom[id].section||SECTIONS[0].key; (result[k]||result[SECTIONS[0].key]).push(id); placed.add(id); } }
   return result;
 }
 
+function getBase(id){ return META[id] || custom[id] || {main:"",note:"",workout:false}; }
+function itemText(id){ const o=textOv[id]||{}, b=getBase(id); return { main:(o.main!=null?o.main:b.main)||"", note:(o.note!=null?o.note:b.note)||"", workout:b.workout }; }
+function esc(s){ return (s||"").replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function check(){return '<svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"></polyline></svg>';}
 function gripSVG(){return '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="5.5" cy="3.5" r="1.25"/><circle cx="10.5" cy="3.5" r="1.25"/><circle cx="5.5" cy="8" r="1.25"/><circle cx="10.5" cy="8" r="1.25"/><circle cx="5.5" cy="12.5" r="1.25"/><circle cx="10.5" cy="12.5" r="1.25"/></svg>';}
 
 function rowHTML(id){
-  const it=META[id]; if(!it) return "";
+  const t=itemText(id);
   const checked = checks[id] ? "checked":"";
-  const pill = it.workout ? '<span class="pill">Morning</span>':"";
-  const note = it.note ? '<span class="note">'+it.note+'</span>':"";
-  return '<li class="task" data-id="'+id+'">'+
-    '<label class="row">'+
-      '<input type="checkbox" data-id="'+id+'" '+checked+'>'+
-      '<span class="box">'+check()+'</span>'+
-      '<span class="txt"><span class="main">'+pill+it.main+'</span>'+note+'</span>'+
-    '</label>'+
+  const doneCls = checks[id] ? " done-row":"";
+  const pill = t.workout ? '<span class="pill">Morning</span>':"";
+  const showNote = editing || (t.note && t.note.length);
+  const ce = editing ? ' contenteditable="true"':'';
+  const note = showNote ? '<span class="note edt" data-field="note"'+ce+'>'+esc(t.note)+'</span>':"";
+  return '<li class="task'+doneCls+'" data-id="'+id+'">'+
+    '<label class="check"><input type="checkbox" data-id="'+id+'" '+checked+'><span class="box">'+check()+'</span></label>'+
+    '<div class="txt"><span class="main">'+pill+'<span class="maintext edt" data-field="main"'+ce+'>'+esc(t.main)+'</span></span>'+note+'</div>'+
+    '<button class="del" aria-label="Delete task" title="Delete">&times;</button>'+
     '<span class="grip" aria-label="Drag to move" title="Drag to move">'+gripSVG()+'</span>'+
   '</li>';
 }
 
 function render(){
+  sortables.forEach(s=>{ try{s.destroy();}catch(e){} }); sortables=[];
   const grid=document.getElementById("grid");
   grid.innerHTML = SECTIONS.map(sec=>{
     const ids = layout[sec.key]||[];
@@ -275,12 +328,15 @@ function render(){
     return '<section class="card'+(sec.lock?' lock':'')+'">'+
       '<div class="day-head"><span class="day-name">'+sec.name+'</span>'+
       '<span style="display:flex;gap:12px;align-items:baseline;">'+dateEl+prog+'</span></div>'+
-      tz+'<ul class="tasks" data-section="'+sec.key+'">'+rows+'</ul></section>';
+      tz+'<ul class="tasks" data-section="'+sec.key+'">'+rows+'</ul>'+
+      '<div class="addrow"><button class="addbtn" data-section="'+sec.key+'">+ Add task</button></div>'+
+      '</section>';
   }).join("");
 
   grid.querySelectorAll('input[type=checkbox]').forEach(cb=>{
     cb.addEventListener("change", ()=>{
       if(cb.checked) checks[cb.dataset.id]=true; else delete checks[cb.dataset.id];
+      cb.closest('li.task').classList.toggle('done-row', cb.checked);
       save(); updateProgress();
     });
   });
@@ -290,38 +346,20 @@ function render(){
 }
 
 function initSortables(){
-  if(typeof Sortable==="undefined"){
-    document.getElementById("savedNote").textContent="Drag unavailable, ticking still works.";
-    return;
-  }
+  if(typeof Sortable==="undefined"){ document.getElementById("savedNote").textContent="Drag unavailable, ticking still works."; return; }
   document.querySelectorAll('ul.tasks').forEach(ul=>{
-    new Sortable(ul,{
-      group:'week',
-      handle:'.grip',
-      animation:150,
-      ghostClass:'ghost',
-      chosenClass:'chosen',
-      onEnd:()=>{ layout=readLayout(); save(); updateProgress(); }
-    });
+    sortables.push(new Sortable(ul,{ group:'week', handle:'.grip', animation:150, ghostClass:'ghost', chosenClass:'chosen',
+      onEnd:()=>{ layout=readLayout(); save(); updateProgress(); } }));
   });
 }
 
-function readLayout(){
-  const l={};
-  document.querySelectorAll('ul.tasks').forEach(ul=>{
-    l[ul.dataset.section] = Array.from(ul.children).map(li=>li.dataset.id).filter(Boolean);
-  });
-  return l;
-}
+function readLayout(){ const l={}; document.querySelectorAll('ul.tasks').forEach(ul=>{ l[ul.dataset.section]=Array.from(ul.children).map(li=>li.dataset.id).filter(Boolean); }); return l; }
 
 function updateProgress(){
   let total=0,done=0;
   document.querySelectorAll('ul.tasks').forEach(ul=>{
     let st=0,n=0;
-    ul.querySelectorAll('li.task').forEach(li=>{
-      n++; total++;
-      const cb=li.querySelector('input'); if(cb&&cb.checked){st++;done++;}
-    });
+    ul.querySelectorAll('li.task').forEach(li=>{ n++; total++; const cb=li.querySelector('input'); if(cb&&cb.checked){st++;done++;} });
     const el=document.getElementById('prog-'+ul.dataset.section);
     if(el){ el.textContent=st+' / '+n; el.classList.toggle('done', n>0 && st===n); }
   });
@@ -330,14 +368,101 @@ function updateProgress(){
   document.getElementById('barFill').style.width=(total?Math.round(done/total*100):0)+'%';
 }
 
+function toggle(id){
+  const cb=document.querySelector('li.task[data-id="'+id+'"] input');
+  if(!cb) return;
+  cb.checked=!cb.checked;
+  if(cb.checked) checks[id]=true; else delete checks[id];
+  cb.closest('li.task').classList.toggle('done-row', cb.checked);
+  save(); updateProgress();
+}
+
+function addTask(sectionKey){
+  const id="u"+Date.now().toString(36)+Math.floor(Math.random()*1000);
+  custom[id]={main:"New task", note:"", section:sectionKey};
+  layout[sectionKey]=layout[sectionKey]||[]; layout[sectionKey].push(id);
+  save(); render();
+  const el=document.querySelector('li.task[data-id="'+id+'"] .maintext');
+  if(el){ const r=document.createRange(); r.selectNodeContents(el); const s=window.getSelection(); s.removeAllRanges(); s.addRange(r); el.focus(); }
+}
+
+function delTask(id){
+  if(META[id] && !custom[id]){ if(deleted.indexOf(id)===-1) deleted.push(id); }
+  if(custom[id]) delete custom[id];
+  delete checks[id]; delete textOv[id];
+  for(const k in layout){ layout[k]=layout[k].filter(x=>x!==id); }
+  save(); render();
+}
+
+function onEditField(target){
+  const li=target.closest('li.task'); if(!li) return;
+  const id=li.dataset.id, field=target.dataset.field;
+  const val=target.textContent.replace(/\s+/g,' ').trim();
+  textOv[id]=textOv[id]||{}; textOv[id][field]=val; save();
+}
+
+function setEdit(on){
+  editing=on;
+  document.body.classList.toggle('editing',on);
+  document.getElementById('editBtn').textContent= on?'Done':'Edit';
+  render();
+}
+
+function serializeContent(){
+  return SECTIONS.map(s=>{
+    const ids=(layout[s.key]||[]);
+    const items=ids.map(id=>{ const t=itemText(id); const o={id:id, main:t.main}; if(t.note) o.note=t.note; if(t.workout) o.workout=true; return o; });
+    const sec={key:s.key, name:s.name};
+    if(s.date) sec.date=s.date;
+    if(s.tz) sec.tz=s.tz;
+    if(s.lock) sec.lock=true;
+    sec.items=items;
+    return sec;
+  });
+}
+
+function downloadContent(){
+  const text=JSON.stringify(serializeContent(),null,2);
+  const blob=new Blob([text],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='content.json';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },0);
+  const note=document.getElementById('savedNote');
+  note.textContent='content.json downloaded. Commit it to your repo to update every device.';
+  setTimeout(()=>{note.textContent='Changes save automatically.';},4000);
+}
+
+const grid=document.getElementById('grid');
+grid.addEventListener('click', e=>{
+  const del=e.target.closest('.del'); if(del && editing){ delTask(del.closest('li.task').dataset.id); return; }
+  const add=e.target.closest('.addbtn'); if(add){ addTask(add.dataset.section); return; }
+  if(editing) return;
+  if(e.target.closest('.check')) return;
+  if(e.target.closest('.grip')) return;
+  const txt=e.target.closest('.txt'); if(txt){ toggle(txt.closest('li.task').dataset.id); }
+});
+grid.addEventListener('focusout', e=>{ if(e.target.classList && e.target.classList.contains('edt')) onEditField(e.target); });
+grid.addEventListener('keydown', e=>{ if(e.target.classList && e.target.classList.contains('maintext') && e.key==='Enter'){ e.preventDefault(); e.target.blur(); } });
+
+document.getElementById('editBtn').addEventListener('click', ()=>setEdit(!editing));
+document.getElementById('exportBtn').addEventListener('click', downloadContent);
+
+document.getElementById("resetBtn").addEventListener("click", async ()=>{
+  if(!confirm("Reset to the published plan and clear ticks, edits, and moves on this device?")) return;
+  checks={}; layout=cloneDefaultLayout(); textOv={}; custom={}; deleted=[];
+  try{ await Store.del(STORE_KEY); }catch(e){}
+  render();
+});
+
 async function load(){
   let saved=null;
-  try{ const r=await window.storage.get(STORE_KEY); if(r&&r.value) saved=JSON.parse(r.value); }catch(e){}
-  if(saved && (saved.checks||saved.layout)){
-    checks = saved.checks||{};
-    layout = reconcileLayout(saved.layout||cloneDefaultLayout());
+  try{ const r=await Store.get(STORE_KEY); if(r&&r.value) saved=JSON.parse(r.value); }catch(e){}
+  if(saved && (saved.checks||saved.layout||saved.text||saved.custom)){
+    checks=saved.checks||{}; textOv=saved.text||{}; custom=saved.custom||{}; deleted=saved.deleted||[];
+    layout=reconcileLayout(saved.layout||cloneDefaultLayout());
   } else if(saved && typeof saved==='object'){
-    checks = saved; layout = cloneDefaultLayout();
+    checks=saved; layout=cloneDefaultLayout();
   } else {
     checks={}; layout=cloneDefaultLayout();
   }
@@ -348,19 +473,92 @@ let saveTimer=null;
 async function save(){
   const note=document.getElementById('savedNote');
   try{
-    await window.storage.set(STORE_KEY, JSON.stringify({checks:checks, layout:readLayout()}));
-    note.textContent='Saved';
+    await Store.set(STORE_KEY, JSON.stringify({checks:checks, layout:readLayout(), text:textOv, custom:custom, deleted:deleted}));
+    note.textContent=(__backend==="memory")?'Saved for this session only':'Saved';
     clearTimeout(saveTimer); saveTimer=setTimeout(()=>{note.textContent='Changes save automatically.';},1400);
   }catch(e){ note.textContent='Saved for this session only'; }
 }
 
-document.getElementById("resetBtn").addEventListener("click", async ()=>{
-  checks={}; layout=cloneDefaultLayout();
-  try{ await window.storage.delete(STORE_KEY); }catch(e){}
-  render();
+async function boot(){
+  let data=DATA;
+  try{
+    const r=await fetch('./content.json',{cache:'no-store'});
+    if(r.ok){ const j=await r.json(); if(Array.isArray(j) && j.length) data=j; }
+  }catch(e){}
+  buildModel(data);
+  await load();
+}
+
+const GH_KEY="weekboard:gh";
+let gh={owner:"", repo:"", branch:"main", path:"content.json", token:""};
+
+function detectGh(){
+  try{
+    const host=location.hostname;
+    if(host.endsWith(".github.io")){
+      gh.owner=host.split(".")[0];
+      const seg=location.pathname.split("/").filter(Boolean);
+      gh.repo = seg.length ? seg[0] : (gh.owner+".github.io");
+    }
+  }catch(e){}
+}
+function ghStore(write){
+  if(write){ try{ localStorage.setItem(GH_KEY, JSON.stringify(gh)); }catch(e){} }
+  else { try{ const v=localStorage.getItem(GH_KEY); if(v) gh=Object.assign(gh, JSON.parse(v)); }catch(e){} }
+}
+function b64(text){ return btoa(unescape(encodeURIComponent(text))); }
+
+function openGh(){
+  document.getElementById('ghOwner').value=gh.owner||'';
+  document.getElementById('ghRepo').value=gh.repo||'';
+  document.getElementById('ghBranch').value=gh.branch||'main';
+  document.getElementById('ghPath').value=gh.path||'content.json';
+  document.getElementById('ghToken').value=gh.token||'';
+  document.getElementById('ghpanel').classList.add('open');
+  document.getElementById('ghpanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeGh(){ document.getElementById('ghpanel').classList.remove('open'); }
+
+async function pushToGithub(){
+  const status=document.getElementById('ghStatus');
+  const setS=(m,cls)=>{ status.textContent=m; status.className='ghstatus '+(cls||''); };
+  if(!gh.owner || !gh.repo || !gh.token){ openGh(); setS('Add your owner, repository, and token, then save settings.','err'); return; }
+  const path=gh.path||'content.json', branch=gh.branch||'main';
+  const api='https://api.github.com/repos/'+gh.owner+'/'+gh.repo+'/contents/'+path.split('/').map(encodeURIComponent).join('/');
+  const headers={'Authorization':'Bearer '+gh.token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
+  setS('Publishing to GitHub...','');
+  try{
+    let sha;
+    const g=await fetch(api+'?ref='+encodeURIComponent(branch),{headers});
+    if(g.status===200){ const gj=await g.json(); sha=gj.sha; }
+    else if(g.status===401||g.status===403){ throw new Error('GitHub refused the token. Check it has Contents read and write on this repo and has not expired.'); }
+    else if(g.status!==404){ throw new Error('Could not read the file ('+g.status+'). Check the owner, repository, and branch.'); }
+    const body={ message:'Update content.json from the dashboard', content:b64(JSON.stringify(serializeContent(),null,2)), branch:branch };
+    if(sha) body.sha=sha;
+    const p=await fetch(api,{method:'PUT',headers,body:JSON.stringify(body)});
+    if(p.ok){ setS('Published. The live site updates in about a minute.','ok'); }
+    else{ const t=await p.text(); throw new Error('Publish failed ('+p.status+'). '+t.slice(0,140)); }
+  }catch(e){ setS(String(e.message||e),'err'); }
+}
+
+document.getElementById('settingsBtn').addEventListener('click', openGh);
+document.getElementById('pushBtn').addEventListener('click', pushToGithub);
+document.getElementById('ghCloseBtn').addEventListener('click', closeGh);
+document.getElementById('ghSaveBtn').addEventListener('click', ()=>{
+  gh.owner=document.getElementById('ghOwner').value.trim();
+  gh.repo=document.getElementById('ghRepo').value.trim();
+  gh.branch=document.getElementById('ghBranch').value.trim()||'main';
+  gh.path=document.getElementById('ghPath').value.trim()||'content.json';
+  gh.token=document.getElementById('ghToken').value.trim();
+  ghStore(true);
+  const status=document.getElementById('ghStatus');
+  status.textContent='Settings saved on this device.'; status.className='ghstatus ok';
 });
 
-if(window.storage){ load(); } else { checks={}; layout=cloneDefaultLayout(); render(); }
+detectGh();
+ghStore(false);
+
+boot();
 </script>
 </body>
 </html>
