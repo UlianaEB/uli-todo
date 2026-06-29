@@ -406,6 +406,7 @@ function setEdit(on){
   document.body.classList.toggle('editing',on);
   document.getElementById('editBtn').textContent= on?'Done':'Edit';
   render();
+  if(!on) pushToGithub();
 }
 
 function serializeContent(){
