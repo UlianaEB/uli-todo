@@ -20,6 +20,10 @@
           "main": "Start the GST returns, all companies except Kotzikas"
         },
         {
+          "id": "mon-4",
+          "main": "Call Tambran school about schooling options for the kids"
+        },
+        {
           "id": "mon-3",
           "main": "Run the cleaning schedule report in Claude Code and confirm it executes cleanly"
         },
@@ -36,10 +40,6 @@
           "id": "mon-6",
           "main": "Email the monthly order to Bricemite",
           "note": "By Monday night"
-        },
-        {
-          "id": "umqzgc950678",
-          "main": "Pay $450 for Nicole"
         }
       ]
     },
@@ -66,10 +66,6 @@
         {
           "id": "tue-3",
           "main": "Read Andrew's crypto tax email and book a call with him this week"
-        },
-        {
-          "id": "mon-4",
-          "main": "Call Tambran school about schooling options for the kids 11am"
         },
         {
           "id": "tue-4",
@@ -243,8 +239,6 @@
     }
   ],
   "_checks": {
-    "mon-w": true,
-    "mon-1": true,
-    "mon-3": true
+    "mon-7": true
   }
 }
