@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js"></script>
 <style>
   :root{
     --paper:#F6F5F1;
@@ -28,148 +29,74 @@
     background:var(--paper);
     color:var(--ink);
     font-family:var(--body);
-    font-size:16px;
-    line-height:1.5;
+    font-size:16px;line-height:1.5;
     -webkit-font-smoothing:antialiased;
     padding:0 18px 80px;
   }
   .wrap{max-width:1080px;margin:0 auto;}
 
-  /* Header */
-  header{
-    position:sticky;top:0;z-index:20;
-    background:var(--paper);
-    padding:26px 0 16px;
-    margin-bottom:6px;
-  }
-  .eyebrow{
-    font-family:var(--display);
-    font-size:12px;letter-spacing:.18em;text-transform:uppercase;
-    color:var(--muted);margin:0 0 6px;
-  }
-  .head-row{
-    display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 18px;
-  }
-  h1{
-    font-family:var(--display);
-    font-weight:600;font-size:30px;line-height:1.05;margin:0;letter-spacing:-.01em;
-  }
+  header{position:sticky;top:0;z-index:20;background:var(--paper);padding:26px 0 14px;margin-bottom:6px;}
+  .eyebrow{font-family:var(--display);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;}
+  .head-row{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 18px;}
+  h1{font-family:var(--display);font-weight:600;font-size:30px;line-height:1.05;margin:0;letter-spacing:-.01em;}
   .range{color:var(--muted);font-size:15px;}
-  .meter{
-    margin-top:16px;display:flex;align-items:center;gap:14px;
-  }
-  .bar{
-    position:relative;flex:1;height:8px;border-radius:99px;background:var(--line);overflow:hidden;
-  }
-  .bar > span{
-    position:absolute;left:0;top:0;bottom:0;width:0%;
-    background:var(--accent);border-radius:99px;transition:width .45s cubic-bezier(.2,.7,.2,1);
-  }
-  .count{
-    font-family:var(--display);font-variant-numeric:tabular-nums;
-    font-size:14px;color:var(--ink);white-space:nowrap;font-weight:500;
-  }
+  .meter{margin-top:16px;display:flex;align-items:center;gap:14px;}
+  .bar{position:relative;flex:1;height:8px;border-radius:99px;background:var(--line);overflow:hidden;}
+  .bar > span{position:absolute;left:0;top:0;bottom:0;width:0%;background:var(--accent);border-radius:99px;transition:width .45s cubic-bezier(.2,.7,.2,1);}
+  .count{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:14px;color:var(--ink);white-space:nowrap;font-weight:500;}
   .count b{color:var(--accent);font-weight:600;}
+  .hint{margin:12px 0 0;font-size:13px;color:var(--muted);}
 
-  /* Priorities banner */
-  .priorities{
-    background:var(--urgent-soft);
-    border:1px solid #ECDCC4;
-    border-radius:14px;
-    padding:16px 18px;
-    margin:14px 0 22px;
-  }
-  .priorities .ptitle{
-    font-family:var(--display);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--urgent);margin:0 0 10px;font-weight:600;
-  }
+  .priorities{background:var(--urgent-soft);border:1px solid #ECDCC4;border-radius:14px;padding:16px 18px;margin:14px 0 22px;}
+  .priorities .ptitle{font-family:var(--display);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--urgent);margin:0 0 10px;font-weight:600;}
   .priorities ol{margin:0;padding:0;list-style:none;display:grid;gap:9px;}
-  .priorities li{
-    display:flex;gap:11px;align-items:flex-start;font-size:15px;line-height:1.45;
-  }
-  .priorities .num{
-    font-family:var(--display);font-variant-numeric:tabular-nums;
-    color:var(--urgent);font-weight:600;min-width:16px;
-  }
+  .priorities li{display:flex;gap:11px;align-items:flex-start;font-size:15px;line-height:1.45;}
+  .priorities .num{font-family:var(--display);font-variant-numeric:tabular-nums;color:var(--urgent);font-weight:600;min-width:16px;}
 
-  /* Day grid */
   .grid{display:grid;grid-template-columns:1fr;gap:16px;}
   @media(min-width:720px){.grid{grid-template-columns:1fr 1fr;}}
 
-  .card{
-    background:var(--surface);
-    border:1px solid var(--line);
-    border-radius:16px;
-    padding:18px 18px 8px;
-    display:flex;flex-direction:column;
-  }
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 18px 12px;display:flex;flex-direction:column;}
   .card.lock{grid-column:1/-1;}
-  .day-head{
-    display:flex;align-items:baseline;justify-content:space-between;gap:10px;
-    padding-bottom:12px;margin-bottom:6px;border-bottom:1px solid var(--line);
-  }
+  .day-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:12px;margin-bottom:6px;border-bottom:1px solid var(--line);}
   .day-name{font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-.01em;}
   .day-date{color:var(--faint);font-size:13px;font-family:var(--display);font-variant-numeric:tabular-nums;}
-  .day-prog{
-    font-family:var(--display);font-variant-numeric:tabular-nums;
-    font-size:12.5px;color:var(--muted);font-weight:500;
-  }
+  .day-prog{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--muted);font-weight:500;}
   .day-prog.done{color:var(--accent);}
-
   .tz{font-size:12px;color:var(--faint);margin:-2px 0 8px;}
 
-  /* Task rows */
-  ul.tasks{list-style:none;margin:0;padding:0;}
-  li.task{padding:2px 0;}
-  label.row{
-    display:flex;gap:12px;align-items:flex-start;
-    padding:9px 6px 9px 4px;border-radius:9px;cursor:pointer;
-    transition:background .15s ease;
-  }
+  ul.tasks{list-style:none;margin:0;padding:0;min-height:22px;}
+  li.task{display:flex;align-items:stretch;gap:2px;padding:1px 0;}
+  label.row{flex:1;min-width:0;display:flex;gap:12px;align-items:flex-start;padding:9px 4px 9px 4px;border-radius:9px;cursor:pointer;transition:background .15s ease;}
   label.row:hover{background:#FAFAF8;}
   input[type=checkbox]{position:absolute;opacity:0;width:0;height:0;}
-  .box{
-    flex:none;width:20px;height:20px;margin-top:1px;border-radius:6px;
-    border:1.6px solid #CFD2CC;background:#fff;
-    display:flex;align-items:center;justify-content:center;
-    transition:border-color .15s ease, background .15s ease;
-  }
-  .box svg{width:12px;height:12px;stroke:#fff;stroke-width:3;fill:none;
-    stroke-dasharray:18;stroke-dashoffset:18;transition:stroke-dashoffset .22s ease;}
+  .box{flex:none;width:20px;height:20px;margin-top:1px;border-radius:6px;border:1.6px solid #CFD2CC;background:#fff;display:flex;align-items:center;justify-content:center;transition:border-color .15s ease, background .15s ease;}
+  .box svg{width:12px;height:12px;stroke:#fff;stroke-width:3;fill:none;stroke-dasharray:18;stroke-dashoffset:18;transition:stroke-dashoffset .22s ease;}
   input:focus-visible + .box{outline:2px solid var(--accent);outline-offset:2px;}
   input:checked + .box{background:var(--accent);border-color:var(--accent);}
   input:checked + .box svg{stroke-dashoffset:0;}
-
   .txt{flex:1;min-width:0;}
   .txt .main{font-size:15px;line-height:1.45;transition:color .2s ease;}
   .txt .note{display:block;font-size:13px;color:var(--muted);margin-top:2px;line-height:1.4;}
   input:checked ~ .txt .main{color:var(--faint);text-decoration:line-through;text-decoration-color:#C8CCC7;}
   input:checked ~ .txt .note{color:var(--faint);}
+  .pill{display:inline-block;font-family:var(--display);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:2px 7px;margin-right:8px;vertical-align:1px;}
 
-  .pill{
-    display:inline-block;font-family:var(--display);font-size:10.5px;letter-spacing:.1em;
-    text-transform:uppercase;font-weight:600;color:var(--accent);
-    background:var(--accent-soft);border-radius:6px;padding:2px 7px;margin-right:8px;
-    vertical-align:1px;
-  }
+  .grip{flex:none;width:30px;align-self:stretch;display:flex;align-items:center;justify-content:center;color:var(--faint);border-radius:8px;cursor:grab;opacity:.5;touch-action:none;transition:opacity .15s ease, background .15s ease;}
+  .grip:hover{opacity:1;background:#F2F1EC;}
+  .grip:active{cursor:grabbing;}
+  .grip svg{fill:currentColor;pointer-events:none;}
 
-  /* Footer */
-  footer{
-    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
-    margin-top:26px;padding-top:16px;border-top:1px solid var(--line);
-    color:var(--faint);font-size:13px;
-  }
-  .reset{
-    font-family:var(--body);font-size:13px;color:var(--muted);
-    background:none;border:1px solid var(--line);border-radius:8px;
-    padding:7px 13px;cursor:pointer;transition:all .15s ease;
-  }
+  li.task.ghost{outline:2px dashed var(--accent);outline-offset:-2px;border-radius:10px;}
+  li.task.ghost .row, li.task.ghost .grip{opacity:.3;}
+  li.task.chosen .row{background:#FAFAF8;}
+
+  footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:26px;padding-top:16px;border-top:1px solid var(--line);color:var(--faint);font-size:13px;}
+  .reset{font-family:var(--body);font-size:13px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:8px;padding:7px 13px;cursor:pointer;transition:all .15s ease;}
   .reset:hover{border-color:#D2CFC7;color:var(--ink);background:#fff;}
   .saved{font-variant-numeric:tabular-nums;}
 
-  @media(prefers-reduced-motion:reduce){
-    *{transition:none !important;}
-  }
+  @media(prefers-reduced-motion:reduce){*{transition:none !important;}}
 </style>
 </head>
 <body>
@@ -184,6 +111,7 @@
       <div class="bar"><span id="barFill"></span></div>
       <div class="count"><b id="doneN">0</b> of <span id="totalN">0</span> done</div>
     </div>
+    <p class="hint">Drag the handle on the right of any task to move it to another day.</p>
   </header>
 
   <div class="priorities">
@@ -198,8 +126,8 @@
   <div class="grid" id="grid"></div>
 
   <footer>
-    <span class="saved" id="savedNote">Ticks save automatically.</span>
-    <button class="reset" id="resetBtn">Clear all ticks</button>
+    <span class="saved" id="savedNote">Changes save automatically.</span>
+    <button class="reset" id="resetBtn">Reset to original plan</button>
   </footer>
 </div>
 
@@ -289,89 +217,150 @@ const DATA = [
 ];
 
 const STORE_KEY = "weekboard:v1";
-let state = {};
+
+const META = {};
+const DEFAULT_LAYOUT = {};
+const SECTIONS = DATA.map(sec=>{
+  DEFAULT_LAYOUT[sec.key] = sec.items.map(it=>it.id);
+  sec.items.forEach(it=>{ META[it.id]=it; });
+  return {key:sec.key, name:sec.name, date:sec.date, tz:sec.tz, lock:sec.lock};
+});
+
+let checks = {};
+let layout = {};
+
+function cloneDefaultLayout(){
+  const o={}; for(const k in DEFAULT_LAYOUT) o[k]=DEFAULT_LAYOUT[k].slice(); return o;
+}
+
+function reconcileLayout(l){
+  const result={}; const placed=new Set();
+  SECTIONS.forEach(s=>result[s.key]=[]);
+  for(const k in l){
+    if(!result[k]) continue;
+    l[k].forEach(id=>{ if(META[id] && !placed.has(id)){ result[k].push(id); placed.add(id); } });
+  }
+  SECTIONS.forEach(s=>{
+    DEFAULT_LAYOUT[s.key].forEach(id=>{ if(!placed.has(id)){ result[s.key].push(id); placed.add(id); } });
+  });
+  return result;
+}
 
 function check(){return '<svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"></polyline></svg>';}
+function gripSVG(){return '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="5.5" cy="3.5" r="1.25"/><circle cx="10.5" cy="3.5" r="1.25"/><circle cx="5.5" cy="8" r="1.25"/><circle cx="10.5" cy="8" r="1.25"/><circle cx="5.5" cy="12.5" r="1.25"/><circle cx="10.5" cy="12.5" r="1.25"/></svg>';}
+
+function rowHTML(id){
+  const it=META[id]; if(!it) return "";
+  const checked = checks[id] ? "checked":"";
+  const pill = it.workout ? '<span class="pill">Morning</span>':"";
+  const note = it.note ? '<span class="note">'+it.note+'</span>':"";
+  return '<li class="task" data-id="'+id+'">'+
+    '<label class="row">'+
+      '<input type="checkbox" data-id="'+id+'" '+checked+'>'+
+      '<span class="box">'+check()+'</span>'+
+      '<span class="txt"><span class="main">'+pill+it.main+'</span>'+note+'</span>'+
+    '</label>'+
+    '<span class="grip" aria-label="Drag to move" title="Drag to move">'+gripSVG()+'</span>'+
+  '</li>';
+}
 
 function render(){
-  const grid = document.getElementById("grid");
-  grid.innerHTML = DATA.map(sec=>{
-    const total = sec.items.length;
-    const rows = sec.items.map(it=>{
-      const checked = state[it.id] ? "checked" : "";
-      const pill = it.workout ? '<span class="pill">Morning</span>' : "";
-      const note = it.note ? '<span class="note">'+it.note+'</span>' : "";
-      return '<li class="task"><label class="row">'+
-        '<input type="checkbox" data-id="'+it.id+'" '+checked+'>'+
-        '<span class="box">'+check()+'</span>'+
-        '<span class="txt"><span class="main">'+pill+it.main+'</span>'+note+'</span>'+
-        '</label></li>';
-    }).join("");
-    const dateEl = sec.date ? '<span class="day-date">'+sec.date+'</span>' : "";
-    const tz = sec.tz ? '<p class="tz">'+sec.tz+'</p>' : "";
-    const prog = '<span class="day-prog" id="prog-'+sec.key+'">0 / '+total+'</span>';
+  const grid=document.getElementById("grid");
+  grid.innerHTML = SECTIONS.map(sec=>{
+    const ids = layout[sec.key]||[];
+    const rows = ids.map(rowHTML).join("");
+    const dateEl = sec.date ? '<span class="day-date">'+sec.date+'</span>':"";
+    const tz = sec.tz ? '<p class="tz">'+sec.tz+'</p>':"";
+    const prog = '<span class="day-prog" id="prog-'+sec.key+'">0 / 0</span>';
     return '<section class="card'+(sec.lock?' lock':'')+'">'+
       '<div class="day-head"><span class="day-name">'+sec.name+'</span>'+
       '<span style="display:flex;gap:12px;align-items:baseline;">'+dateEl+prog+'</span></div>'+
-      tz+'<ul class="tasks">'+rows+'</ul></section>';
+      tz+'<ul class="tasks" data-section="'+sec.key+'">'+rows+'</ul></section>';
   }).join("");
 
   grid.querySelectorAll('input[type=checkbox]').forEach(cb=>{
     cb.addEventListener("change", ()=>{
-      state[cb.dataset.id] = cb.checked;
-      if(!cb.checked) delete state[cb.dataset.id];
-      save();
-      updateProgress();
+      if(cb.checked) checks[cb.dataset.id]=true; else delete checks[cb.dataset.id];
+      save(); updateProgress();
     });
   });
+
+  initSortables();
   updateProgress();
 }
 
-function updateProgress(){
-  let total=0, done=0;
-  DATA.forEach(sec=>{
-    let st=0;
-    sec.items.forEach(it=>{ total++; if(state[it.id]){done++; st++;} });
-    const el=document.getElementById("prog-"+sec.key);
-    if(el){
-      el.textContent = st+" / "+sec.items.length;
-      el.classList.toggle("done", st===sec.items.length && sec.items.length>0);
-    }
+function initSortables(){
+  if(typeof Sortable==="undefined"){
+    document.getElementById("savedNote").textContent="Drag unavailable, ticking still works.";
+    return;
+  }
+  document.querySelectorAll('ul.tasks').forEach(ul=>{
+    new Sortable(ul,{
+      group:'week',
+      handle:'.grip',
+      animation:150,
+      ghostClass:'ghost',
+      chosenClass:'chosen',
+      onEnd:()=>{ layout=readLayout(); save(); updateProgress(); }
+    });
   });
-  document.getElementById("doneN").textContent = done;
-  document.getElementById("totalN").textContent = total;
-  const pct = total ? Math.round((done/total)*100) : 0;
-  document.getElementById("barFill").style.width = pct+"%";
+}
+
+function readLayout(){
+  const l={};
+  document.querySelectorAll('ul.tasks').forEach(ul=>{
+    l[ul.dataset.section] = Array.from(ul.children).map(li=>li.dataset.id).filter(Boolean);
+  });
+  return l;
+}
+
+function updateProgress(){
+  let total=0,done=0;
+  document.querySelectorAll('ul.tasks').forEach(ul=>{
+    let st=0,n=0;
+    ul.querySelectorAll('li.task').forEach(li=>{
+      n++; total++;
+      const cb=li.querySelector('input'); if(cb&&cb.checked){st++;done++;}
+    });
+    const el=document.getElementById('prog-'+ul.dataset.section);
+    if(el){ el.textContent=st+' / '+n; el.classList.toggle('done', n>0 && st===n); }
+  });
+  document.getElementById('doneN').textContent=done;
+  document.getElementById('totalN').textContent=total;
+  document.getElementById('barFill').style.width=(total?Math.round(done/total*100):0)+'%';
 }
 
 async function load(){
-  try{
-    const r = await window.storage.get(STORE_KEY);
-    if(r && r.value) state = JSON.parse(r.value);
-  }catch(e){ state = {}; }
+  let saved=null;
+  try{ const r=await window.storage.get(STORE_KEY); if(r&&r.value) saved=JSON.parse(r.value); }catch(e){}
+  if(saved && (saved.checks||saved.layout)){
+    checks = saved.checks||{};
+    layout = reconcileLayout(saved.layout||cloneDefaultLayout());
+  } else if(saved && typeof saved==='object'){
+    checks = saved; layout = cloneDefaultLayout();
+  } else {
+    checks={}; layout=cloneDefaultLayout();
+  }
   render();
 }
 
 let saveTimer=null;
 async function save(){
-  const note=document.getElementById("savedNote");
+  const note=document.getElementById('savedNote');
   try{
-    await window.storage.set(STORE_KEY, JSON.stringify(state));
-    note.textContent="Saved";
-    clearTimeout(saveTimer);
-    saveTimer=setTimeout(()=>{note.textContent="Ticks save automatically.";},1500);
-  }catch(e){
-    note.textContent="Saved for this session only";
-  }
+    await window.storage.set(STORE_KEY, JSON.stringify({checks:checks, layout:readLayout()}));
+    note.textContent='Saved';
+    clearTimeout(saveTimer); saveTimer=setTimeout(()=>{note.textContent='Changes save automatically.';},1400);
+  }catch(e){ note.textContent='Saved for this session only'; }
 }
 
 document.getElementById("resetBtn").addEventListener("click", async ()=>{
-  state={};
+  checks={}; layout=cloneDefaultLayout();
   try{ await window.storage.delete(STORE_KEY); }catch(e){}
   render();
 });
 
-if(window.storage){ load(); } else { render(); }
+if(window.storage){ load(); } else { checks={}; layout=cloneDefaultLayout(); render(); }
 </script>
 </body>
 </html>
