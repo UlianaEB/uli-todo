@@ -6,9 +6,9 @@ exports.handler = async (event) => {
     return { statusCode: 405, body: 'Method not allowed' };
   }
 
-  const token = process.env.GITHUB_TOKEN;
+  const token = process.env.mine;
   if (!token) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'GITHUB_TOKEN not configured' }) };
+    return { statusCode: 500, body: JSON.stringify({ error: 'Token not configured' }) };
   }
 
   let content;
