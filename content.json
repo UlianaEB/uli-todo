@@ -70,10 +70,6 @@
         {
           "id": "mon-4",
           "main": "Call Tambran school about schooling options for the kids 11am"
-        },
-        {
-          "id": "tue-4",
-          "main": "Begin the accounting questionnaire"
         }
       ]
     },
@@ -86,6 +82,10 @@
           "id": "wed-w",
           "main": "Run and pilates",
           "workout": true
+        },
+        {
+          "id": "tue-4",
+          "main": "Begin the accounting questionnaire"
         },
         {
           "id": "wed-1",
@@ -253,6 +253,6 @@
     "mon-5": true,
     "tue-w": true,
     "mon-4": true,
-    "umqzgc950678": true
+    "tue-3": true
   }
 }
